@@ -43,6 +43,116 @@
   line-height: 1;
 }
 
+/* ========================================
+   TODAY'S AGENDA - Compact & Sleek
+   ======================================== */
+
+.header-agenda {
+  background: linear-gradient(135deg, #F9F6F3 0%, #FFFFFF 100%);
+  border-radius: 12px;
+  padding: 16px 20px;
+  border: 2px solid #E8DDD4;
+  box-shadow: 0 4px 16px rgba(139, 115, 85, 0.08);
+  min-width: 300px;
+  max-width: 350px;
+}
+
+.agenda-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #8B7355;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.agenda-title::before {
+  content: '📅';
+  font-size: 14px;
+}
+
+.agenda-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.agenda-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: white;
+  border-radius: 8px;
+  border-left: 3px solid #A68A6D;
+  transition: all 0.2s ease;
+}
+
+.agenda-item.timetable {
+  border-left-color: #6B9080;
+}
+
+.agenda-item.todo {
+  border-left-color: #D4A574;
+}
+
+.agenda-item:hover {
+  transform: translateX(3px);
+  box-shadow: 0 2px 8px rgba(139, 115, 85, 0.12);
+}
+
+.agenda-time {
+  font-size: 11px;
+  font-weight: 700;
+  color: #A68A6D;
+  background: #F5F0EB;
+  padding: 4px 8px;
+  border-radius: 6px;
+  min-width: 50px;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.agenda-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.agenda-item-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #5A4A3A;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.agenda-room {
+  font-size: 11px;
+  color: #8B7355;
+  margin-top: 2px;
+}
+
+.agenda-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  color: #A68A6D;
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.agenda-empty span:first-child {
+  font-size: 18px;
+}
+
 .header-actions {
   display: flex;
   gap: 12px;

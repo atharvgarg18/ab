@@ -321,6 +321,50 @@ const Dashboard: React.FC<DashboardProps> = ({ studentId }) => {
             <div className="current-time">{formatTime(currentTime)}</div>
           </div>
         </div>
+        
+        {/* Today's Agenda - Compact */}
+        <div className="header-agenda">
+          <div className="agenda-title">Today's Agenda</div>
+          <div className="agenda-items">
+            {(() => {
+              const todaySchedule = schedule[today] || {};
+              const currentHour = currentTime.getHours();
+              const upcomingItems: ScheduleItem[] = [];
+              
+              // Get upcoming items for today
+              Object.entries(todaySchedule).forEach(([time, items]) => {
+                const hour = parseInt(time.split(':')[0]);
+                if (hour >= currentHour && items.length > 0) {
+                  upcomingItems.push(...items);
+                }
+              });
+              
+              // Sort by time and take first 3
+              const nextItems = upcomingItems
+                .sort((a, b) => a.time.localeCompare(b.time))
+                .slice(0, 3);
+              
+              if (nextItems.length === 0) {
+                return (
+                  <div className="agenda-empty">
+                    <span>✓</span>
+                    <span>All clear for today!</span>
+                  </div>
+                );
+              }
+              
+              return nextItems.map((item, idx) => (
+                <div key={idx} className={`agenda-item ${item.type}`}>
+                  <div className="agenda-time">{item.time}</div>
+                  <div className="agenda-details">
+                    <div className="agenda-item-title">{item.title}</div>
+                    {item.room && <div className="agenda-room">{item.room}</div>}
+                  </div>
+                </div>
+              ));
+            })()}
+          </div>
+        </div>
       </div>
 
       <div className="dashboard-content">
