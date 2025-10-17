@@ -126,14 +126,12 @@ app.get('/debug', (req, res) => {
 app.use('/api/timetable', timetableRoutes);
 app.use('/api/chat', chatRoutes);
 
-// Start server only if not in serverless environment
-if (process.env.NODE_ENV !== 'production') {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log('[Server] Application running on http://localhost:' + PORT);
-    console.log('[Server] Ready to accept requests');
-  });
-}
+// Start server only if not in serverless environment (Render uses traditional server)
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`[Server] Application running on http://localhost:${PORT}`);
+  console.log('[Server] Ready to accept requests');
+});
 
-// Export for serverless environments (Vercel)
+// Export for any serverless environments that might need it
 module.exports = app;
