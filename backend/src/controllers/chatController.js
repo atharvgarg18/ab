@@ -7,7 +7,14 @@ const {
   generateChatResponse,
   analyzeSession 
 } = require('../services/chatService');
-const { v4: uuidv4 } = require('uuid');
+
+// Simple UUID generator to replace uuid package (ES module issue)
+const generateId = () => {
+  return Math.random().toString(36).substring(2, 15) + 
+         Math.random().toString(36).substring(2, 15) +
+         Date.now().toString(36);
+};
+const uuidv4 = generateId;
 
 /**
  * Start a new conversation or continue existing one

@@ -8,24 +8,14 @@ const chatRoutes = require('./routes/chatRoutes');
 
 console.log('[Server] Starting initialization...');
 
-// Load environment variables from backend/.env (only for local development)
+// Load environment variables only if .env file exists (not needed on Vercel)
 if (process.env.NODE_ENV !== 'production') {
   dotenv.config({ path: path.join(__dirname, '../.env') });
 }
 
 console.log('[Config] Environment variables loaded');
-console.log('[Config] PORT:', process.env.PORT);
 console.log('[Config] MONGODB_URI:', process.env.MONGODB_URI ? 'Configured' : 'Missing');
 console.log('[Config] GEMINI_API_KEY:', process.env.GEMINI_API_KEY ? 'Configured' : 'Missing');
-console.log('[Config] NODE_ENV:', process.env.NODE_ENV);
-
-// Verify environment variables exist
-if (!process.env.MONGODB_URI) {
-  console.error('[Config] ERROR: MONGODB_URI is not set!');
-}
-if (!process.env.GEMINI_API_KEY) {
-  console.error('[Config] ERROR: GEMINI_API_KEY is not set!');
-}
 
 const app = express();
 
@@ -37,61 +27,36 @@ app.use(express.urlencoded({ extended: true }));
 console.log('[Middleware] CORS and JSON parsing configured');
 
 // MongoDB Connection with proper options
-mongoose.connect(process.env.MONGODB_URI, {
-  serverSelectionTimeoutMS: 10000,
-  socketTimeoutMS: 45000,
-  connectTimeoutMS: 10000,
-  retryWrites: true,
-})
-  .then(() => console.log('[Database] Successfully connected to MongoDB Atlas'))
-  .catch((err) => {
-    console.error('[Database] Connection failed:', err.message);
-    console.error('[Database] Error details:', err);
+if (process.env.MONGODB_URI) {
+  mongoose.connect(process.env.MONGODB_URI, {
+    serverSelectionTimeoutMS: 10000,
+    socketTimeoutMS: 45000,
+  })
+    .then(() => console.log('[Database] Successfully connected to MongoDB Atlas'))
+    .catch((err) => {
+      console.error('[Database] Connection failed:', err.message);
+    });
+
+  // Monitor connection errors
+  mongoose.connection.on('error', (err) => {
+    console.error('[Database] Runtime error:', err.message);
   });
 
-// Monitor connection errors
-mongoose.connection.on('error', (err) => {
-  console.error('[Database] Runtime error:', err.message);
-});
-
-mongoose.connection.on('disconnected', () => {
-  console.warn('[Database] Connection lost - will attempt to reconnect');
-});
+  mongoose.connection.on('disconnected', () => {
+    console.warn('[Database] Connection lost - will attempt to reconnect');
+  });
+} else {
+  console.warn('[Database] MONGODB_URI not configured - database operations will fail');
+}
 
 // Basic test route
 app.get('/', (req, res) => {
-  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
-  res.json({ 
-    message: 'Timetable API is running!',
-    database: dbStatus,
-    nodeEnv: process.env.NODE_ENV,
-    timestamp: new Date().toISOString()
-  });
-});
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({ message: 'Timetable API is running!' });
 });
 
 // Routes
 app.use('/api/timetable', timetableRoutes);
 app.use('/api/chat', chatRoutes);
-
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found', path: req.path });
-});
-
-// Global error handler
-app.use((err, req, res, next) => {
-  console.error('[Error] Caught error:', err);
-  res.status(500).json({ 
-    error: 'Internal server error',
-    message: err.message,
-    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
-  });
-});
 
 // Start server only if not in serverless environment
 if (process.env.NODE_ENV !== 'production') {
