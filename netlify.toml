@@ -3,9 +3,9 @@
 # Build Settings
 [build]
   base = "frontend"
-  publish = "frontend/dist"
+  publish = "dist"
   command = "npm install && npm run build"
-  functions = "netlify/functions"
+  functions = "../netlify/functions"
 
 # Environment variables (set these in Netlify dashboard)
 [build.environment]
@@ -40,4 +40,4 @@
 # Function settings
 [functions]
   node_bundler = "esbuild"
-  included_files = ["backend/src/**"]
+  included_files = ["../backend/src/**"]
