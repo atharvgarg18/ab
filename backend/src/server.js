@@ -38,12 +38,13 @@ if (process.env.MONGODB_URI) {
       console.log('[Database] Attempting to connect to MongoDB...');
       
       await mongoose.connect(process.env.MONGODB_URI, {
-        serverSelectionTimeoutMS: 5000,
-        socketTimeoutMS: 5000,
-        connectTimeoutMS: 5000,
+        serverSelectionTimeoutMS: 15000,
+        socketTimeoutMS: 15000,
+        connectTimeoutMS: 15000,
         retryWrites: false,
-        maxPoolSize: 10,
-        minPoolSize: 5
+        maxPoolSize: 5,
+        minPoolSize: 2,
+        family: 4  // Force IPv4
       });
       
       mongoConnected = true;
@@ -53,8 +54,8 @@ if (process.env.MONGODB_URI) {
       mongoConnected = false;
       mongoError = err.message;
       console.error('[Database] Connection error:', err.message);
-      // Try to reconnect after 3 seconds
-      setTimeout(connectDB, 3000);
+      // Try to reconnect after 5 seconds
+      setTimeout(connectDB, 5000);
     }
   };
   
