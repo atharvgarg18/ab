@@ -14,7 +14,7 @@
 # Redirect API calls to Netlify Functions
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  to = "/.netlify/functions/api/:splat"
   status = 200
 
 # SPA fallback - redirect all routes to index.html
