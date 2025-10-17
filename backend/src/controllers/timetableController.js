@@ -1,5 +1,13 @@
 const Timetable = require('../models/Timetable');
 const { extractTimetable } = require('../services/geminiService');
+const mongoose = require('mongoose');
+
+/**
+ * Check if database is connected
+ */
+const isDbConnected = () => {
+  return mongoose.connection.readyState === 1;
+};
 
 /**
  * Upload and process timetable
@@ -67,6 +75,14 @@ exports.getStudentTimetables = async (req, res) => {
     
     if (!studentId) {
       return res.status(400).json({ error: 'Student ID is required' });
+    }
+    
+    if (!isDbConnected()) {
+      console.log('[Timetable] Database not connected, status:', mongoose.connection.readyState);
+      return res.status(503).json({ 
+        error: 'Database connection unavailable',
+        dbStatus: mongoose.connection.readyState
+      });
     }
     
     console.log(`[Timetable] Fetching timetables for student: ${studentId}`);

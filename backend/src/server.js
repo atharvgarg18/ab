@@ -27,23 +27,48 @@ app.use(express.urlencoded({ extended: true }));
 console.log('[Middleware] CORS and JSON parsing configured');
 
 // MongoDB Connection with proper options
-if (process.env.MONGODB_URI) {
-  mongoose.connect(process.env.MONGODB_URI, {
-    serverSelectionTimeoutMS: 10000,
-    socketTimeoutMS: 45000,
-  })
-    .then(() => console.log('[Database] Successfully connected to MongoDB Atlas'))
-    .catch((err) => {
-      console.error('[Database] Connection failed:', err.message);
-    });
+let mongoConnected = false;
 
-  // Monitor connection errors
+if (process.env.MONGODB_URI) {
+  mongoose.set('strictQuery', false);
+  
+  const connectDB = async () => {
+    try {
+      await mongoose.connect(process.env.MONGODB_URI, {
+        serverSelectionTimeoutMS: 30000,
+        socketTimeoutMS: 60000,
+        connectTimeoutMS: 30000,
+        retryWrites: true,
+        w: 'majority'
+      });
+      
+      mongoConnected = true;
+      console.log('[Database] Successfully connected to MongoDB Atlas');
+    } catch (err) {
+      console.error('[Database] Connection failed:', err.message);
+      mongoConnected = false;
+      // Try to reconnect after 5 seconds
+      setTimeout(connectDB, 5000);
+    }
+  };
+  
+  // Start connection immediately
+  connectDB();
+
+  // Monitor connection events
   mongoose.connection.on('error', (err) => {
     console.error('[Database] Runtime error:', err.message);
+    mongoConnected = false;
   });
 
   mongoose.connection.on('disconnected', () => {
-    console.warn('[Database] Connection lost - will attempt to reconnect');
+    console.warn('[Database] Connection lost');
+    mongoConnected = false;
+  });
+
+  mongoose.connection.on('connected', () => {
+    console.log('[Database] MongoDB connected');
+    mongoConnected = true;
   });
 } else {
   console.warn('[Database] MONGODB_URI not configured - database operations will fail');
