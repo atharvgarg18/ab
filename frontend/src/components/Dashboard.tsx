@@ -340,16 +340,48 @@ const Dashboard: React.FC<DashboardProps> = ({ studentId }) => {
               });
               
               // Sort by time and take first 3
-              const nextItems = upcomingItems
+              let nextItems = upcomingItems
                 .sort((a, b) => a.time.localeCompare(b.time))
                 .slice(0, 3);
               
+              // If no items for today, show tomorrow's agenda
               if (nextItems.length === 0) {
+                const tomorrow = days[(days.indexOf(today) + 1) % days.length];
+                const tomorrowSchedule = schedule[tomorrow] || {};
+                const tomorrowItems: ScheduleItem[] = [];
+                
+                Object.entries(tomorrowSchedule).forEach(([, items]) => {
+                  if (items.length > 0) {
+                    tomorrowItems.push(...items);
+                  }
+                });
+                
+                nextItems = tomorrowItems
+                  .sort((a, b) => a.time.localeCompare(b.time))
+                  .slice(0, 3);
+                
+                if (nextItems.length === 0) {
+                  return (
+                    <div className="agenda-empty">
+                      <span>✓</span>
+                      <span>All clear!</span>
+                    </div>
+                  );
+                }
+                
                 return (
-                  <div className="agenda-empty">
-                    <span>✓</span>
-                    <span>All clear for today!</span>
-                  </div>
+                  <>
+                    <div className="agenda-day-label">📅 Tomorrow ({tomorrow.substring(0, 3)})</div>
+                    {nextItems.map((item, idx) => (
+                      <div key={idx} className={`agenda-item ${item.type}`}>
+                        <div className="agenda-time">{item.time}</div>
+                        <div className="agenda-details">
+                          <div className="agenda-item-title">{item.title}</div>
+                          {item.room && <div className="agenda-room">{item.room}</div>}
+                        </div>
+                      </div>
+                    ))}
+                  </>
                 );
               }
               
