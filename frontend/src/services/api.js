@@ -1,10 +1,8 @@
 import axios from 'axios';
 
-// Use environment variable or fallback to production backend URL
-const API_URL = import.meta.env.VITE_API_URL || 
-                (typeof window !== 'undefined' && window.location.hostname === 'localhost' 
-                  ? 'http://localhost:5000'
-                  : 'https://backend-qbad1kwgu-atharvs-projects-bda4da03.vercel.app');
+// For production (Netlify), use relative path which will be proxied to Netlify Functions
+// For local development, use localhost:5000
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000');
 
 const api = axios.create({
   baseURL: API_URL,
@@ -12,19 +10,6 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
-
-// Add response interceptor to handle 401 errors with better messaging
-api.interceptors.response.use(
-  response => response,
-  error => {
-    if (error.response?.status === 401) {
-      console.error('🔒 Backend is protected. This means Vercel Deployment Protection is enabled on the backend.');
-      console.error('📝 Fix: Disable Deployment Protection in Vercel settings: https://vercel.com/settings');
-      // Don't throw, let the calling function handle it
-    }
-    return Promise.reject(error);
-  }
-);
 
 // Timetable API calls
 export const timetableAPI = {
