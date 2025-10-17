@@ -343,56 +343,57 @@ const Dashboard: React.FC<DashboardProps> = ({ studentId }) => {
               let nextItems = upcomingItems
                 .sort((a, b) => a.time.localeCompare(b.time));
               
-              // If no items for today, show tomorrow's agenda
-              if (nextItems.length === 0) {
-                const tomorrow = days[(days.indexOf(today) + 1) % days.length];
-                const tomorrowSchedule = schedule[tomorrow] || {};
-                const tomorrowItems: ScheduleItem[] = [];
-                
-                Object.entries(tomorrowSchedule).forEach(([, items]) => {
-                  if (items.length > 0) {
-                    tomorrowItems.push(...items);
-                  }
-                });
-                
-                nextItems = tomorrowItems
-                  .sort((a, b) => a.time.localeCompare(b.time));
-                
-                if (nextItems.length === 0) {
-                  return (
-                    <div className="agenda-empty">
-                      <span>✓</span>
-                      <span>All clear!</span>
-                    </div>
-                  );
-                }
-                
+              // If there ARE items for today, show today's agenda
+              if (nextItems.length > 0) {
                 return (
-                  <>
-                    <div className="agenda-day-label">📅 Tomorrow ({tomorrow.substring(0, 3)})</div>
-                    <div className="agenda-items-row">
-                      {nextItems.map((item, idx) => (
-                        <div key={idx} className={`agenda-item-card ${item.type}`}>
-                          <div className="agenda-item-time">{item.time}</div>
-                          <div className="agenda-item-name">{item.title}</div>
-                          {item.room && <div className="agenda-item-room">{item.room}</div>}
-                        </div>
-                      ))}
-                    </div>
-                  </>
+                  <div className="agenda-items-row">
+                    {nextItems.map((item, idx) => (
+                      <div key={idx} className={`agenda-item-card ${item.type}`}>
+                        <div className="agenda-item-time">{item.time}</div>
+                        <div className="agenda-item-name">{item.title}</div>
+                        {item.room && <div className="agenda-item-room">{item.room}</div>}
+                      </div>
+                    ))}
+                  </div>
+                );
+              }
+              
+              // If no items for today, show tomorrow's agenda
+              const tomorrow = days[(days.indexOf(today) + 1) % days.length];
+              const tomorrowSchedule = schedule[tomorrow] || {};
+              const tomorrowItems: ScheduleItem[] = [];
+              
+              Object.entries(tomorrowSchedule).forEach(([, items]) => {
+                if (items.length > 0) {
+                  tomorrowItems.push(...items);
+                }
+              });
+              
+              const sortedTomorrowItems = tomorrowItems
+                .sort((a, b) => a.time.localeCompare(b.time));
+              
+              if (sortedTomorrowItems.length === 0) {
+                return (
+                  <div className="agenda-empty">
+                    <span>✓</span>
+                    <span>All clear!</span>
+                  </div>
                 );
               }
               
               return (
-                <div className="agenda-items-row">
-                  {nextItems.map((item, idx) => (
-                    <div key={idx} className={`agenda-item-card ${item.type}`}>
-                      <div className="agenda-item-time">{item.time}</div>
-                      <div className="agenda-item-name">{item.title}</div>
-                      {item.room && <div className="agenda-item-room">{item.room}</div>}
-                    </div>
-                  ))}
-                </div>
+                <>
+                  <div className="agenda-day-label">📅 Tomorrow ({tomorrow.substring(0, 3)})</div>
+                  <div className="agenda-items-row">
+                    {sortedTomorrowItems.map((item, idx) => (
+                      <div key={idx} className={`agenda-item-card ${item.type}`}>
+                        <div className="agenda-item-time">{item.time}</div>
+                        <div className="agenda-item-name">{item.title}</div>
+                        {item.room && <div className="agenda-item-room">{item.room}</div>}
+                      </div>
+                    ))}
+                  </div>
+                </>
               );
             })()}
           </div>
