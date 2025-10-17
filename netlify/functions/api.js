@@ -5,10 +5,204 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const multer = require('multer');
-const path = require('path');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // Load environment variables
 dotenv.config();
+
+// MongoDB Models
+const timetableSchema = new mongoose.Schema({
+  studentId: { 
+    type: String, 
+    required: true 
+  },
+  metadata: {
+    semester: String,
+    academicYear: String,
+    institutionName: String,
+    courseName: String,
+    studentName: String,
+    section: String,
+    any: mongoose.Schema.Types.Mixed
+  },
+  structuredData: {
+    type: mongoose.Schema.Types.Mixed,
+    required: true
+  },
+  originalFileUrl: String,
+  rawExtractedText: String,
+  createdAt: { 
+    type: Date, 
+    default: Date.now 
+  },
+  updatedAt: { 
+    type: Date, 
+    default: Date.now 
+  }
+});
+
+const conversationSchema = new mongoose.Schema({
+  studentId: {
+    type: String,
+    required: true
+  },
+  timetableId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Timetable'
+  },
+  messages: [{
+    role: {
+      type: String,
+      enum: ['user', 'assistant'],
+      required: true
+    },
+    content: {
+      type: String,
+      required: true
+    },
+    sentiment: String,
+    timestamp: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+const Timetable = mongoose.models.Timetable || mongoose.model('Timetable', timetableSchema);
+const Conversation = mongoose.models.Conversation || mongoose.model('Conversation', conversationSchema);
+
+// Gemini Service Functions
+async function extractTimetableFromBuffer(fileBuffer, mimeType) {
+  try {
+    console.log('[Gemini] Initializing extraction service');
+    
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY is not configured');
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-2.0-flash-exp",
+    });
+
+    const prompt = `
+You are an expert at analyzing and extracting timetable/schedule information from images. 
+
+Analyze this timetable image and extract ALL information in a structured JSON format. Be intelligent and flexible - understand the format and structure it appropriately.
+
+Return ONLY a valid JSON object with this general structure:
+{
+  "metadata": {
+    "semester": "extract if visible",
+    "academicYear": "extract if visible", 
+    "institutionName": "extract if visible",
+    "courseName": "extract if visible",
+    "studentName": "extract if visible",
+    "section": "extract if visible",
+    "any_other_info": "extract any other relevant metadata"
+  },
+  "schedule": {
+    "Monday": [{"time": "9:00-10:00", "subject": "Math", "teacher": "Dr. X", "room": "101"}],
+    "Tuesday": [{"time": "9:00-10:00", "subject": "Physics", "teacher": "Dr. Y", "room": "102"}],
+    "Wednesday": [],
+    "Thursday": [],
+    "Friday": [],
+    "Saturday": [],
+    "Sunday": []
+  }
+}
+
+Guidelines:
+- Extract ALL visible information including: subjects, teachers, rooms, times, days
+- Preserve exact names and spellings
+- Use time formats like "9:00AM - 10:00AM" or "09:00-10:00"
+- If a cell is empty, return empty array for that day
+- Include any special notes, lab sessions, tutorial sessions
+- Always structure with days of week as keys
+
+Return ONLY the JSON, no markdown formatting, no explanations.
+`;
+
+    console.log('[Gemini] Sending request to API');
+    const imagePart = {
+      inlineData: {
+        data: fileBuffer.toString('base64'),
+        mimeType
+      }
+    };
+    
+    const result = await model.generateContent([prompt, imagePart]);
+    const response = await result.response;
+    let text = response.text();
+    
+    console.log('[Gemini] Response received - parsing data');
+    
+    // Remove markdown code blocks if present
+    text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    
+    // Parse the JSON response
+    const parsedData = JSON.parse(text);
+    
+    console.log('[Gemini] Data parsed successfully');
+    
+    return {
+      success: true,
+      data: parsedData,
+      rawText: text
+    };
+  } catch (error) {
+    console.error('[Gemini] Extraction failed:', error.message);
+    return {
+      success: false,
+      error: error.message || 'Unknown error occurred during timetable extraction'
+    };
+  }
+}
+
+// Chat Service Function
+async function generateChatResponse(message, conversationHistory, timetableContext) {
+  try {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY is not configured');
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+
+    let prompt = `You are a helpful AI assistant for students. `;
+    
+    if (timetableContext) {
+      prompt += `The student's timetable is: ${JSON.stringify(timetableContext)}. Use this to answer questions about their schedule. `;
+    }
+    
+    prompt += `\n\nConversation history:\n`;
+    conversationHistory.forEach(msg => {
+      prompt += `${msg.role}: ${msg.content}\n`;
+    });
+    
+    prompt += `\nUser: ${message}\n\nAssistant:`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+
+    return {
+      message: text,
+      sentiment: 'neutral'
+    };
+  } catch (error) {
+    console.error('[Chat] Error generating response:', error);
+    throw error;
+  }
+}
 
 // Create Express app
 const app = express();
@@ -49,14 +243,6 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
-// Import models
-const Timetable = require('../../backend/src/models/Timetable');
-const Conversation = require('../../backend/src/models/Conversation');
-
-// Import services
-const geminiService = require('../../backend/src/services/geminiService');
-const chatService = require('../../backend/src/services/chatService');
-
 // ==========================================
 // TIMETABLE ROUTES
 // ==========================================
@@ -80,14 +266,23 @@ app.post('/api/timetable/upload', upload.single('timetable'), async (req, res) =
     console.log(`[Upload] Processing timetable for student: ${studentId}`);
 
     // Extract timetable using Gemini
-    const extractedData = await geminiService.extractTimetableFromImage(file.buffer);
+    const extractedData = await extractTimetableFromBuffer(file.buffer, file.mimetype);
+    
+    if (!extractedData.success) {
+      return res.status(500).json({ 
+        error: 'Failed to extract timetable',
+        details: extractedData.error 
+      });
+    }
     
     // Save to database
     const timetable = new Timetable({
       studentId,
-      rawText: extractedData.rawText,
-      structuredData: extractedData.structuredData,
-      uploadDate: new Date()
+      rawExtractedText: extractedData.rawText,
+      structuredData: extractedData.data,
+      metadata: extractedData.data.metadata || {},
+      createdAt: new Date(),
+      updatedAt: new Date()
     });
 
     await timetable.save();
@@ -222,7 +417,7 @@ app.post('/api/chat/message', async (req, res) => {
     }
 
     // Generate AI response
-    const aiResponse = await chatService.generateResponse(
+    const aiResponse = await generateChatResponse(
       message,
       conversation.messages.slice(0, -1),
       timetableContext
