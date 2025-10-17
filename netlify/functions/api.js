@@ -62,7 +62,7 @@ const chatService = require('../../backend/src/services/chatService');
 // ==========================================
 
 // Upload timetable
-app.post('/timetable/upload', upload.single('timetable'), async (req, res) => {
+app.post('/api/timetable/upload', upload.single('timetable'), async (req, res) => {
   try {
     await connectToDatabase();
 
@@ -111,7 +111,7 @@ app.post('/timetable/upload', upload.single('timetable'), async (req, res) => {
 });
 
 // Get timetables for student
-app.get('/timetable/student/:studentId', async (req, res) => {
+app.get('/api/timetable/student/:studentId', async (req, res) => {
   try {
     await connectToDatabase();
 
@@ -132,7 +132,7 @@ app.get('/timetable/student/:studentId', async (req, res) => {
 });
 
 // Get specific timetable
-app.get('/timetable/:id', async (req, res) => {
+app.get('/api/timetable/:id', async (req, res) => {
   try {
     await connectToDatabase();
 
@@ -156,7 +156,7 @@ app.get('/timetable/:id', async (req, res) => {
 });
 
 // Delete timetable
-app.delete('/timetable/:id', async (req, res) => {
+app.delete('/api/timetable/:id', async (req, res) => {
   try {
     await connectToDatabase();
 
@@ -184,7 +184,7 @@ app.delete('/timetable/:id', async (req, res) => {
 // ==========================================
 
 // Send message
-app.post('/chat/message', async (req, res) => {
+app.post('/api/chat/message', async (req, res) => {
   try {
     await connectToDatabase();
 
@@ -257,7 +257,7 @@ app.post('/chat/message', async (req, res) => {
 });
 
 // Get conversation
-app.get('/chat/conversation/:studentId', async (req, res) => {
+app.get('/api/chat/conversation/:studentId', async (req, res) => {
   try {
     await connectToDatabase();
 
@@ -280,7 +280,7 @@ app.get('/chat/conversation/:studentId', async (req, res) => {
 });
 
 // Delete conversation
-app.delete('/chat/conversation/:id', async (req, res) => {
+app.delete('/api/chat/conversation/:id', async (req, res) => {
   try {
     await connectToDatabase();
 
@@ -300,7 +300,7 @@ app.delete('/chat/conversation/:id', async (req, res) => {
 });
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok',
     message: 'Netlify Function API is running',
