@@ -65,13 +65,29 @@ exports.getStudentTimetables = async (req, res) => {
   try {
     const { studentId } = req.params;
     
+    if (!studentId) {
+      return res.status(400).json({ error: 'Student ID is required' });
+    }
+    
+    console.log(`[Timetable] Fetching timetables for student: ${studentId}`);
+    
     const timetables = await Timetable.find({ studentId })
       .sort({ createdAt: -1 });
     
-    res.json({ timetables });
+    console.log(`[Timetable] Found ${timetables.length} timetables`);
+    
+    res.json({ 
+      success: true,
+      timetables,
+      count: timetables.length
+    });
   } catch (error) {
-    console.error('Fetch error:', error);
-    res.status(500).json({ error: 'Failed to fetch timetables' });
+    console.error('[Timetable] Fetch error:', error.message, error.stack);
+    res.status(500).json({ 
+      error: 'Failed to fetch timetables',
+      details: error.message,
+      studentId: req.params.studentId
+    });
   }
 };
 

@@ -51,7 +51,40 @@ if (process.env.MONGODB_URI) {
 
 // Basic test route
 app.get('/', (req, res) => {
-  res.json({ message: 'Timetable API is running!' });
+  const dbStatus = mongoose.connection.readyState;
+  res.json({ 
+    message: 'Timetable API is running!',
+    database: dbStatus === 1 ? 'Connected' : 'Disconnected',
+    mongodbConfigured: !!process.env.MONGODB_URI,
+    env: {
+      mongodb: process.env.MONGODB_URI ? 'Set' : 'NOT SET',
+      gemini: process.env.GEMINI_API_KEY ? 'Set' : 'NOT SET'
+    }
+  });
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'ok',
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  });
+});
+
+// Debug endpoint - test database connection
+app.get('/debug', (req, res) => {
+  res.json({
+    mongoUri: process.env.MONGODB_URI ? '***SET***' : 'NOT SET',
+    mongoStatus: mongoose.connection.readyState,
+    mongoStatusText: {
+      0: 'disconnected',
+      1: 'connected',
+      2: 'connecting',
+      3: 'disconnecting'
+    }[mongoose.connection.readyState],
+    nodeEnv: process.env.NODE_ENV,
+    error: mongoose.connection.readyState !== 1 ? 'Database not connected' : null
+  });
 });
 
 // Routes
