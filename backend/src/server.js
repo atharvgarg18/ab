@@ -28,27 +28,33 @@ console.log('[Middleware] CORS and JSON parsing configured');
 
 // MongoDB Connection with proper options
 let mongoConnected = false;
+let mongoError = null;
 
 if (process.env.MONGODB_URI) {
   mongoose.set('strictQuery', false);
   
   const connectDB = async () => {
     try {
+      console.log('[Database] Attempting to connect to MongoDB...');
+      
       await mongoose.connect(process.env.MONGODB_URI, {
-        serverSelectionTimeoutMS: 30000,
-        socketTimeoutMS: 60000,
-        connectTimeoutMS: 30000,
-        retryWrites: true,
-        w: 'majority'
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 5000,
+        connectTimeoutMS: 5000,
+        retryWrites: false,
+        maxPoolSize: 10,
+        minPoolSize: 5
       });
       
       mongoConnected = true;
+      mongoError = null;
       console.log('[Database] Successfully connected to MongoDB Atlas');
     } catch (err) {
-      console.error('[Database] Connection failed:', err.message);
       mongoConnected = false;
-      // Try to reconnect after 5 seconds
-      setTimeout(connectDB, 5000);
+      mongoError = err.message;
+      console.error('[Database] Connection error:', err.message);
+      // Try to reconnect after 3 seconds
+      setTimeout(connectDB, 3000);
     }
   };
   
@@ -59,6 +65,7 @@ if (process.env.MONGODB_URI) {
   mongoose.connection.on('error', (err) => {
     console.error('[Database] Runtime error:', err.message);
     mongoConnected = false;
+    mongoError = err.message;
   });
 
   mongoose.connection.on('disconnected', () => {
@@ -69,6 +76,7 @@ if (process.env.MONGODB_URI) {
   mongoose.connection.on('connected', () => {
     console.log('[Database] MongoDB connected');
     mongoConnected = true;
+    mongoError = null;
   });
 } else {
   console.warn('[Database] MONGODB_URI not configured - database operations will fail');
@@ -108,6 +116,7 @@ app.get('/debug', (req, res) => {
       3: 'disconnecting'
     }[mongoose.connection.readyState],
     nodeEnv: process.env.NODE_ENV,
+    mongoError: mongoError || null,
     error: mongoose.connection.readyState !== 1 ? 'Database not connected' : null
   });
 });
