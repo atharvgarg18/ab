@@ -4,12 +4,12 @@
 [build]
   base = "frontend"
   publish = "dist"
-  command = "npm install && npm run build"
+  command = "npm install && npm run build && cd ../netlify && npm install"
   functions = "../netlify/functions"
 
 # Environment variables (set these in Netlify dashboard)
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20"
 
 # Redirect API calls to Netlify Functions
 [[redirects]]
