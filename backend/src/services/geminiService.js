@@ -2,12 +2,22 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const fs = require('fs');
 
 /**
- * Convert file to base64
+ * Convert file to base64 - handles both file paths and buffers
  */
-function fileToGenerativePart(filePath, mimeType) {
+function fileToGenerativePart(fileInput, mimeType) {
+  let base64Data;
+  
+  // Check if it's a buffer or file path
+  if (Buffer.isBuffer(fileInput)) {
+    base64Data = fileInput.toString('base64');
+  } else {
+    // It's a file path
+    base64Data = Buffer.from(fs.readFileSync(fileInput)).toString('base64');
+  }
+  
   return {
     inlineData: {
-      data: Buffer.from(fs.readFileSync(filePath)).toString('base64'),
+      data: base64Data,
       mimeType
     }
   };

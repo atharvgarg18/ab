@@ -1,15 +1,10 @@
 const Timetable = require('../models/Timetable');
 const { extractTimetable } = require('../services/geminiService');
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
 
 /**
  * Upload and process timetable
  */
 exports.uploadTimetable = async (req, res) => {
-  let tempFilePath = null;
-  
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -21,27 +16,10 @@ exports.uploadTimetable = async (req, res) => {
       return res.status(400).json({ error: 'Student ID is required' });
     }
 
-    // Determine mime type
-    const mimeType = req.file.mimetype;
-    
     console.log(`Processing file: ${req.file.originalname}`);
     
-    // For serverless/memory storage, write buffer to temp file
-    let filePathToProcess;
-    if (req.file.path) {
-      // Disk storage (local development)
-      filePathToProcess = req.file.path;
-    } else if (req.file.buffer) {
-      // Memory storage (Vercel serverless)
-      tempFilePath = path.join(os.tmpdir(), `${Date.now()}-${req.file.originalname}`);
-      fs.writeFileSync(tempFilePath, req.file.buffer);
-      filePathToProcess = tempFilePath;
-    } else {
-      return res.status(400).json({ error: 'File processing error' });
-    }
-    
-    // Extract timetable using Gemini
-    const extractionResult = await extractTimetable(filePathToProcess, mimeType);
+    // Extract timetable using Gemini with file buffer (works on Vercel)
+    const extractionResult = await extractTimetable(req.file.buffer, req.file.mimetype);
     
     if (!extractionResult.success) {
       return res.status(500).json({ 
@@ -72,19 +50,11 @@ exports.uploadTimetable = async (req, res) => {
 
   } catch (error) {
     console.error('Upload error:', error);
+    
     res.status(500).json({ 
       error: 'Internal server error',
       details: error.message 
     });
-  } finally {
-    // Clean up temp file if created
-    if (tempFilePath && fs.existsSync(tempFilePath)) {
-      try {
-        fs.unlinkSync(tempFilePath);
-      } catch (e) {
-        console.warn('Failed to delete temp file:', e.message);
-      }
-    }
   }
 };
 

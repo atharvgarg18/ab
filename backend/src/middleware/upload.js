@@ -1,8 +1,6 @@
 const multer = require('multer');
-const path = require('path');
 
-// Use memory storage for Vercel serverless compatibility
-// (disk storage doesn't persist between function invocations)
+// Use memory storage for Vercel (no persistent file system)
 const storage = multer.memoryStorage();
 
 // File filter - accept common image and document formats
