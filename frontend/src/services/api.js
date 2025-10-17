@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-// For production (Netlify), use relative path which will be proxied to Netlify Functions
+// For production (Vercel), use VITE_API_URL from .env.production
 // For local development, use localhost:5000
-const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000');
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const api = axios.create({
   baseURL: API_URL,
