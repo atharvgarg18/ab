@@ -339,10 +339,9 @@ const Dashboard: React.FC<DashboardProps> = ({ studentId }) => {
                 }
               });
               
-              // Sort by time and take first 3
+              // Sort by time and take all items
               let nextItems = upcomingItems
-                .sort((a, b) => a.time.localeCompare(b.time))
-                .slice(0, 3);
+                .sort((a, b) => a.time.localeCompare(b.time));
               
               // If no items for today, show tomorrow's agenda
               if (nextItems.length === 0) {
@@ -357,8 +356,7 @@ const Dashboard: React.FC<DashboardProps> = ({ studentId }) => {
                 });
                 
                 nextItems = tomorrowItems
-                  .sort((a, b) => a.time.localeCompare(b.time))
-                  .slice(0, 3);
+                  .sort((a, b) => a.time.localeCompare(b.time));
                 
                 if (nextItems.length === 0) {
                   return (
@@ -372,28 +370,30 @@ const Dashboard: React.FC<DashboardProps> = ({ studentId }) => {
                 return (
                   <>
                     <div className="agenda-day-label">📅 Tomorrow ({tomorrow.substring(0, 3)})</div>
-                    {nextItems.map((item, idx) => (
-                      <div key={idx} className={`agenda-item ${item.type}`}>
-                        <div className="agenda-time">{item.time}</div>
-                        <div className="agenda-details">
-                          <div className="agenda-item-title">{item.title}</div>
-                          {item.room && <div className="agenda-room">{item.room}</div>}
+                    <div className="agenda-items-row">
+                      {nextItems.map((item, idx) => (
+                        <div key={idx} className={`agenda-item-card ${item.type}`}>
+                          <div className="agenda-item-time">{item.time}</div>
+                          <div className="agenda-item-name">{item.title}</div>
+                          {item.room && <div className="agenda-item-room">{item.room}</div>}
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </>
                 );
               }
               
-              return nextItems.map((item, idx) => (
-                <div key={idx} className={`agenda-item ${item.type}`}>
-                  <div className="agenda-time">{item.time}</div>
-                  <div className="agenda-details">
-                    <div className="agenda-item-title">{item.title}</div>
-                    {item.room && <div className="agenda-room">{item.room}</div>}
-                  </div>
+              return (
+                <div className="agenda-items-row">
+                  {nextItems.map((item, idx) => (
+                    <div key={idx} className={`agenda-item-card ${item.type}`}>
+                      <div className="agenda-item-time">{item.time}</div>
+                      <div className="agenda-item-name">{item.title}</div>
+                      {item.room && <div className="agenda-item-room">{item.room}</div>}
+                    </div>
+                  ))}
                 </div>
-              ));
+              );
             })()}
           </div>
         </div>
