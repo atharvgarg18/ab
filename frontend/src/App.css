@@ -1,0 +1,199 @@
+.App {
+  min-height: 100vh;
+  background-color: #E8DDD4;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========================================
+   NAVIGATION BAR - PREMIUM LUXURY
+   ======================================== */
+
+.app-nav {
+  background-color: #F5F0EB;
+  border-bottom: 1px solid #D4C5B9;
+  padding: 1rem 2.5rem;
+  box-shadow: 0 2px 8px rgba(139, 115, 85, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Logo/Title */
+.app-nav h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  color: #5A4A3A;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.app-nav h1 strong {
+  color: var(--primary);
+}
+
+/* Navigation Buttons */
+.nav-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.nav-buttons button {
+  padding: 0.65rem 1.5rem;
+  border: 1.5px solid #D4C5B9;
+  background-color: transparent;
+  color: #8B7355;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
+}
+
+.nav-buttons button:hover {
+  border-color: #A68A6D;
+  color: #5A4A3A;
+  background-color: rgba(166, 138, 109, 0.08);
+}
+
+.nav-buttons button.active {
+  background-color: #A68A6D;
+  color: white;
+  border-color: #A68A6D;
+  box-shadow: 0 2px 8px rgba(166, 138, 109, 0.2);
+}
+
+.nav-buttons button.active:hover {
+  background-color: #8B7355;
+  border-color: #8B7355;
+}
+
+/* Student ID Input */
+.student-id-input {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.student-id-input label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #5A4A3A;
+  white-space: nowrap;
+}
+
+.student-id-input input {
+  padding: 0.65rem 1.25rem;
+  border: 1.5px solid #D4C5B9;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  min-width: 220px;
+  transition: all 0.2s ease;
+  background-color: white;
+  color: #5A4A3A;
+  font-weight: 500;
+}
+
+.student-id-input input::placeholder {
+  color: #A68A6D;
+}
+
+.student-id-input input:focus {
+  outline: none;
+  border-color: #A68A6D;
+  background-color: white;
+  box-shadow: 0 0 0 3px rgba(166, 138, 109, 0.1);
+}
+
+/* ========================================
+   MAIN CONTENT AREA
+   ======================================== */
+
+.app-content {
+  flex: 1;
+  padding: 2.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .app-nav {
+    gap: 1.5rem;
+  }
+
+  .app-content {
+    padding: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-nav {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.2rem;
+    padding: 1.2rem;
+  }
+
+  .app-nav h1 {
+    text-align: center;
+    font-size: 1.4rem;
+  }
+
+  .nav-buttons {
+    justify-content: stretch;
+  }
+
+  .nav-buttons button {
+    flex: 1;
+  }
+
+  .student-id-input {
+    justify-content: center;
+  }
+
+  .student-id-input input {
+    min-width: 100%;
+  }
+
+  .app-content {
+    padding: 1.5rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-nav {
+    padding: 1rem;
+  }
+
+  .app-nav h1 {
+    font-size: 1.2rem;
+  }
+
+  .nav-buttons button {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+
+  .student-id-input input {
+    font-size: 0.9rem;
+  }
+
+  .app-content {
+    padding: 1rem;
+  }
+}

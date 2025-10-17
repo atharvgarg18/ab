@@ -1,0 +1,261 @@
+.priority-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  background: #E8DDD4;
+  min-height: 100vh;
+}
+
+.priority-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.priority-header h1 {
+  font-size: 34px;
+  font-weight: 700;
+  color: #5A4A3A;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.5px;
+}
+
+.priority-header p {
+  font-size: 15px;
+  color: #8B7355;
+  margin: 0;
+}
+
+.priority-card {
+  background: white;
+  border: 1px solid #D4C5B9;
+  border-radius: 16px;
+  padding: 32px;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(139, 115, 85, 0.08);
+}
+
+.save-notification {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #A68A6D, #8B7355);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(166, 138, 109, 0.3);
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.priority-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.priority-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: #F5F0EB;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.priority-item.editable {
+  cursor: move;
+  border-color: #D4C5B9;
+}
+
+.priority-item.editable:hover {
+  border-color: #A68A6D;
+  background: white;
+  box-shadow: 0 4px 12px rgba(166, 138, 109, 0.12);
+}
+
+.priority-item.dragging {
+  opacity: 0.5;
+  transform: scale(0.98);
+}
+
+.priority-rank {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #A68A6D, #8B7355);
+  color: white;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.rank-number {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.priority-content {
+  flex: 1;
+}
+
+.priority-content h3 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #3A2F24;
+}
+
+.priority-content p {
+  margin: 0;
+  font-size: 13px;
+  color: #8B7355;
+}
+
+.drag-handle {
+  color: #8B7355;
+  font-size: 20px;
+  cursor: move;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.priority-item.editable:hover .drag-handle {
+  opacity: 1;
+}
+
+.priority-actions {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.edit-button,
+.save-button,
+.cancel-button {
+  padding: 12px 32px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.edit-button {
+  background: #A68A6D;
+  color: white;
+}
+
+.edit-button:hover {
+  background: #8B7355;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(166, 138, 109, 0.3);
+}
+
+.edit-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.cancel-button {
+  background: white;
+  color: #8B7355;
+  border: 1px solid #D4C5B9;
+}
+
+.cancel-button:hover {
+  background: #F5F0EB;
+  border-color: #8B7355;
+}
+
+.save-button {
+  background: #A68A6D;
+  color: white;
+}
+
+.save-button:hover {
+  background: #8B7355;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(166, 138, 109, 0.3);
+}
+
+.priority-info {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(166, 138, 109, 0.08);
+  border-radius: 10px;
+  border: 1px solid rgba(166, 138, 109, 0.15);
+}
+
+.info-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.priority-info p {
+  margin: 0;
+  font-size: 13px;
+  color: #8B7355;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .priority-container {
+    padding: 24px 16px;
+  }
+
+  .priority-header h1 {
+    font-size: 28px;
+  }
+
+  .priority-card {
+    padding: 24px;
+  }
+
+  .priority-item {
+    padding: 16px;
+  }
+
+  .priority-rank {
+    width: 40px;
+    height: 40px;
+  }
+
+  .rank-number {
+    font-size: 18px;
+  }
+
+  .priority-content h3 {
+    font-size: 16px;
+  }
+
+  .edit-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .edit-button,
+  .save-button,
+  .cancel-button {
+    width: 100%;
+  }
+}
